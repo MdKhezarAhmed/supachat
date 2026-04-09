@@ -5,6 +5,8 @@ services:
     build: ./backend
     container_name: supachat-backend
     env_file: ./backend/.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8000:8000"
     deploy:
