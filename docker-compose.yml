@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    container_name: supachat-backend
+    env_file: ./backend/.env
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - supachat-net
+
+  frontend:
+    build: ./frontend
+    container_name: supachat-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - supachat-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: supachat-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - supachat-net
+
+networks:
+  supachat-net:
+    driver: bridge

@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+supabase
+groq
+python-dotenv
+prometheus-fastapi-instrumentator
+pydantic
+httpx
