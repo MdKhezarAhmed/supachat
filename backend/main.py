@@ -74,7 +74,16 @@ async def query(req: QueryRequest):
     try:
         q = req.question.lower()
         data = []
-
+        
+        # Handle greetings
+        greetings = ["hi", "hello", "hey", "sup", "what's up", "howdy"]
+        if any(q == g for g in greetings):
+            return {
+                "response": "Hey! 👋 I'm SupaChat. Ask me anything about the blog analytics. Try: 'Show top trending topics' or 'Compare article engagement by topic'",
+                "data": [],
+                "chart_type": "table"
+            }
+        
         if "trending" in q or "topic" in q:
             result = supabase.table("article_engagement")\
                 .select("*, articles(title, topic)")\
