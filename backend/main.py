@@ -7,7 +7,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 import os
 import json
 from dotenv import load_dotenv
-
+from agent import router as agent_router
 load_dotenv()
 
 app = FastAPI(title="SupaChat API")
@@ -22,6 +22,7 @@ app.add_middleware(
 
 # Prometheus metrics
 Instrumentator().instrument(app).expose(app)
+app.include_router(agent_router)
 
 # Clients
 supabase: Client = create_client(
