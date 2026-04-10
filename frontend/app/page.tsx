@@ -147,6 +147,22 @@ export default function SupaChat() {
             {q}
           </button>
         ))}
+       {messages.filter(m => m.role === "user").length > 0 && (
+          <>
+            <div className="mt-6 text-xs text-gray-500 uppercase mb-3 font-semibold">History</div>
+            <div className="overflow-y-auto flex-1">
+              {messages
+                .filter(m => m.role === "user")
+                .map((m, i) => (
+                  <button key={i} onClick={() => sendMessage(m.content)}
+                    className="text-left text-xs text-gray-500 hover:text-white hover:bg-gray-800 p-2 rounded-lg mb-1 transition-colors w-full truncate">
+                    {m.content}
+                  </button>
+                ))}
+            </div>
+          </>
+        )}
+
         <div className="mt-auto text-xs text-gray-600">Powered by Supabase + Groq</div>
       </div>
 
