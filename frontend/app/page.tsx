@@ -17,14 +17,28 @@ const COLORS = ["#6366f1","#22d3ee","#f59e0b","#10b981","#f43f5e","#a78bfa"];
 
 function DataChart({ data, chartType }: { data: any[]; chartType: string }) {
   if (!data || data.length === 0) return null;
-  const keys = Object.keys(data[0]).filter(k => k !== "id");
-  const numericKey = keys.find(k => typeof data[0][k] === "number") || keys[1];
-  const labelKey = keys[0];
+
+  // Flatten nested objects
+  const flatData = data.map(row => {
+    const flat: any = {};
+    Object.entries(row).forEach(([k, v]) => {
+      if (typeof v === "object" && v !== null && !Array.isArray(v)) {
+        Object.entries(v).forEach(([k2, v2]) => { flat[k2] = v2; });
+      } else {
+        flat[k] = v;
+      }
+    });
+    return flat;
+  });
+
+  const keys = Object.keys(flatData[0]).filter(k => k !== "id");
+  const numericKey = keys.find(k => typeof flatData[0][k] === "number") || keys[1];
+  const labelKey = keys.find(k => typeof flatData[0][k] === "string") || keys[0];
 
   if (chartType === "line") {
     return (
       <ResponsiveContainer width="100%" height={250}>
-        <LineChart data={data}>
+        <LineChart data={flatData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
           <XAxis dataKey={labelKey} tick={{ fill: "#9ca3af", fontSize: 11 }} />
           <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} />
@@ -39,8 +53,8 @@ function DataChart({ data, chartType }: { data: any[]; chartType: string }) {
     return (
       <ResponsiveContainer width="100%" height={250}>
         <PieChart>
-          <Pie data={data} dataKey={numericKey} nameKey={labelKey} cx="50%" cy="50%" outerRadius={80} label>
-            {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+          <Pie data={flatData} dataKey={numericKey} nameKey={labelKey} cx="50%" cy="50%" outerRadius={80} label>
+            {flatData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
           </Pie>
           <Tooltip contentStyle={{ background: "#1f2937" }} />
           <Legend />
@@ -51,7 +65,7 @@ function DataChart({ data, chartType }: { data: any[]; chartType: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={250}>
-      <BarChart data={data}>
+      <BarChart data={flatData}>
         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
         <XAxis dataKey={labelKey} tick={{ fill: "#9ca3af", fontSize: 11 }} />
         <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} />
