@@ -116,8 +116,10 @@ async def query(req: QueryRequest):
             data = result.data
 
         else:
-            result = supabase.table("articles")\
-                .select("*, article_engagement(*)")\
+            result = supabase.table("article_engagement")\
+                .select("likes, comments, shares, articles(title, topic)")\
+                .order("likes", desc=True)\
+                .limit(10)\
                 .execute()
             data = result.data
 
