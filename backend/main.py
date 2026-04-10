@@ -132,3 +132,39 @@ async def query(req: QueryRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    # MCP Query Translator
+class MCPQueryTranslator:
+    def __init__(self, client):
+        self.client = client
+    
+    def translate(self, question: str) -> dict:
+        response = self.client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an MCP query translator. Convert natural language to structured query.
+Return only valid JSON with these fields:
+- table: articles, article_views, or article_engagement
+- operation: select, aggregate, or trend
+- filters: any filters
+- order_by: field to sort
+- limit: max results"""
+                },
+                {"role": "user", "content": question}
+            ],
+            temperature=0
+        )
+        try:
+            return json.loads(response.choices[0].message.content)
+        except:
+            return {"table": "articles", "operation": "select", "limit": 10}
+
+@app.post("/api/mcp/translate")
+async def mcp_translate(req: QueryRequest):
+    try:
+        translator = MCPQueryTranslator(groq_client)
+        mcp_query = translator.translate(req.question)
+        return {"mcp_query": mcp_query, "question": req.question}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
