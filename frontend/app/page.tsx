@@ -114,10 +114,10 @@ export default function SupaChat() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/query`,
-        { question, history: [] }
-      );
+ const res = await axios.post(
+  `/api/query`,
+  { question, history: [] }
+);
       setMessages(prev => [...prev, {
         role: "assistant",
         content: res.data.response,
