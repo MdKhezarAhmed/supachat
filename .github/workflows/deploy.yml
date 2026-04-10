@@ -7,15 +7,47 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/supachat
-            git pull origin main
-            docker-compose down
-            docker-compose up -d --build
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Add EC2 to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy files to EC2
+        run: |
+          rsync -avz --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/ubuntu/supachat/
+
+      - name: Create .env on EC2
+        run: |
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
+            cat > /home/ubuntu/supachat/backend/.env << 'EOF'
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+          GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+          EOF
+          "
+
+      - name: Deploy on EC2
+        run: |
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
+            cd /home/ubuntu/supachat &&
+            docker-compose down &&
+            docker-compose up --build -d
+          "
+
+      - name: Health check
+        run: |
+          sleep 20
+          curl -f http://${{ secrets.EC2_HOST }}/health || exit 1
+          echo "Deployment successful!"
