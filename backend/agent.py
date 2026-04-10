@@ -59,6 +59,11 @@ async def devops_agent(req: AgentRequest):
         summary = ask_ai(f"Summarize this deployment status:\n{output}")
         return {"action": "status", "output": output, "summary": summary}
 
+    elif "ci" in cmd or "github" in cmd or "pipeline" in cmd or "failure" in cmd:
+        output = run_shell("docker-compose -f /home/ubuntu/supachat/docker-compose.yml logs --tail=30 2>&1")
+        summary = ask_ai(f"""Analyze these logs and explain if there are any CI/CD or deployment failures. 
+Give RCA (Root Cause Analysis) and suggest fixes:\n{output}""")
+        return {"action": "cicd_analysis", "output": output[:2000], "summary": summary}
     else:
         summary = ask_ai(f"User asked: '{req.command}'. Suggest what DevOps actions they can take from: health check, restart containers, view logs, check resources, check deployment status.")
         return {"action": "help", "output": "", "summary": summary}
