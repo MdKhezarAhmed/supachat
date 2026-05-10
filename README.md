@@ -2,9 +2,6 @@
 
 AI-powered analytics chatbot built on Supabase PostgreSQL.
 
-## Live URL
-http://3.88.68.15
-
 ## Architecture
 - **Frontend**: Next.js + Recharts
 - **Backend**: FastAPI + Groq AI + MCP Query Translator
