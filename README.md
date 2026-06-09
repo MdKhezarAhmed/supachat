@@ -2,6 +2,12 @@
 
 AI-powered analytics chatbot built on Supabase PostgreSQL.
 
+## Live Project Walkthrough
+
+> **Audio Notice:** The demo contains voice explanations. For the best experience, please increase your volume before watching.
+
+**Watch Demo:** https://youtu.be/LDpcJ448olU
+
 ## Architecture
 - **Frontend**: Next.js + Recharts
 - **Backend**: FastAPI + Groq AI + MCP Query Translator
@@ -44,8 +50,8 @@ Push to `main` branch → GitHub Actions auto deploys to EC2.
 5. Health check verified
 
 ## Monitoring Dashboards
-- Grafana: http://3.88.68.15:3001 (admin/admin123)
-- Prometheus: http://3.88.68.15:9090
+- Grafana: http://ec2-ip:3001 (admin/admin123)
+- Prometheus: http://ec2-ip:9090
 - Node Exporter dashboard imported (ID: 1860)
 - Backend metrics: /metrics endpoint
 
